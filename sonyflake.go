@@ -8,6 +8,8 @@ package sonyflake
 
 import (
 	"errors"
+	"log"
+	"math/rand"
 	"net"
 	"sync"
 	"time"
@@ -83,7 +85,7 @@ func NewSonyflake(st Settings) *Sonyflake {
 
 // NextID generates a next unique ID.
 // After the Sonyflake time overflows, NextID returns an error.
-func (sf *Sonyflake) NextID() (uint64, error) {
+func (sf *Sonyflake) NextID() uint64 {
 	const maskSequence = uint16(1<<BitLenSequence - 1)
 
 	sf.mutex.Lock()
@@ -120,14 +122,25 @@ func sleepTime(overtime int64) time.Duration {
 		time.Duration(time.Now().UTC().UnixNano()%sonyflakeTimeUnit)*time.Nanosecond
 }
 
-func (sf *Sonyflake) toID() (uint64, error) {
+//func (sf *Sonyflake) toID() (uint64, error) {
+//	if sf.elapsedTime >= 1<<BitLenTime {
+//		return 0, errors.New("over the time limit")
+//	}
+//
+//	return uint64(sf.elapsedTime)<<(BitLenSequence+BitLenMachineID) |
+//		uint64(sf.sequence)<<BitLenMachineID |
+//		uint64(sf.machineID), nil
+//}
+func (sf *Sonyflake) toID() uint64 {
 	if sf.elapsedTime >= 1<<BitLenTime {
-		return 0, errors.New("over the time limit")
+		//return 0, errors.New("over the time limit")
+		log.Println("[ID ERROR]: over the time limit")
+		return rand.Uint64()
 	}
 
 	return uint64(sf.elapsedTime)<<(BitLenSequence+BitLenMachineID) |
 		uint64(sf.sequence)<<BitLenMachineID |
-		uint64(sf.machineID), nil
+		uint64(sf.machineID)
 }
 
 func privateIPv4() (net.IP, error) {
@@ -170,13 +183,13 @@ func Decompose(id uint64) map[string]uint64 {
 	const maskMachineID = uint64(1<<BitLenMachineID - 1)
 
 	msb := id >> 63
-	time := id >> (BitLenSequence + BitLenMachineID)
+	t := id >> (BitLenSequence + BitLenMachineID)
 	sequence := id & maskSequence >> BitLenMachineID
 	machineID := id & maskMachineID
 	return map[string]uint64{
 		"id":         id,
 		"msb":        msb,
-		"time":       time,
+		"time":       t,
 		"sequence":   sequence,
 		"machine-id": machineID,
 	}

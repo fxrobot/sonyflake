@@ -30,11 +30,12 @@ func init() {
 }
 
 func nextID(t *testing.T) uint64 {
-	id, err := sf.NextID()
-	if err != nil {
-		t.Fatal("id not generated")
-	}
-	return id
+	//id, err := sf.NextID()
+	//if err != nil {
+	//	t.Fatal("id not generated")
+	//}
+	//return id
+	return sf.NextID()
 }
 
 func TestSonyflakeOnce(t *testing.T) {
@@ -185,8 +186,9 @@ func TestNextIDError(t *testing.T) {
 	nextID(t)
 
 	pseudoSleep(time.Duration(1) * year)
-	_, err := sf.NextID()
-	if err == nil {
-		t.Errorf("time is not over")
-	}
+	sf.NextID()
+	//_, err := sf.NextID()
+	//if err == nil {
+	//	t.Errorf("time is not over")
+	//}
 }
