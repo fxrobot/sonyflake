@@ -20,11 +20,11 @@ func init() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	id, err := sf.NextID()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	id := sf.NextID()
+	//if err != nil {
+	//	http.Error(w, err.Error(), http.StatusInternalServerError)
+	//	return
+	//}
 
 	body, err := json.Marshal(sonyflake.Decompose(id))
 	if err != nil {
