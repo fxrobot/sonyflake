@@ -1,4 +1,4 @@
-module github.com/sony/sonyflake
+module github.com/fxrobot/sonyflake
 
 go 1.12
 
