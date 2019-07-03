@@ -38,8 +38,8 @@ const (
 // If CheckMachineID is nil, no validation is done.
 type Settings struct {
 	StartTime      time.Time
-	MachineID      func() (uint16, error)
-	CheckMachineID func(uint16) bool
+	MachineID      func() (int16, error)
+	CheckMachineID func(int16) bool
 }
 
 // Sonyflake is a distributed unique ID generator.
@@ -47,8 +47,8 @@ type Sonyflake struct {
 	mutex       *sync.Mutex
 	startTime   int64
 	elapsedTime int64
-	sequence    uint16
-	machineID   uint16
+	sequence    int16
+	machineID   int16
 }
 
 // NewSonyflake returns a new Sonyflake configured with the given Settings.
@@ -59,7 +59,7 @@ type Sonyflake struct {
 func NewSonyflake(st Settings) (*Sonyflake, error) {
 	sf := new(Sonyflake)
 	sf.mutex = new(sync.Mutex)
-	sf.sequence = uint16(1<<BitLenSequence - 1)
+	sf.sequence = int16(1<<BitLenSequence - 1)
 
 	if st.StartTime.After(time.Now()) {
 		return nil, errors.New("start time after current time")
@@ -85,8 +85,8 @@ func NewSonyflake(st Settings) (*Sonyflake, error) {
 
 // NextID generates a next unique ID.
 // After the Sonyflake time overflows, NextID returns an error.
-func (sf *Sonyflake) NextID() uint64 {
-	const maskSequence = uint16(1<<BitLenSequence - 1)
+func (sf *Sonyflake) NextID() int64 {
+	const maskSequence = int16(1<<BitLenSequence - 1)
 
 	sf.mutex.Lock()
 	defer sf.mutex.Unlock()
@@ -131,16 +131,16 @@ func sleepTime(overtime int64) time.Duration {
 //		uint64(sf.sequence)<<BitLenMachineID |
 //		uint64(sf.machineID), nil
 //}
-func (sf *Sonyflake) toID() uint64 {
+func (sf *Sonyflake) toID() int64 {
 	if sf.elapsedTime >= 1<<BitLenTime {
 		//return 0, errors.New("over the time limit")
 		log.Println("[ID ERROR]: over the time limit")
-		return rand.Uint64()
+		return rand.Int63()
 	}
 
-	return uint64(sf.elapsedTime)<<(BitLenSequence+BitLenMachineID) |
-		uint64(sf.sequence)<<BitLenMachineID |
-		uint64(sf.machineID)
+	return int64(sf.elapsedTime)<<(BitLenSequence+BitLenMachineID) |
+		int64(sf.sequence)<<BitLenMachineID |
+		int64(sf.machineID)
 }
 
 func privateIPv4() (net.IP, error) {
@@ -168,13 +168,13 @@ func isPrivateIPv4(ip net.IP) bool {
 		(ip[0] == 10 || ip[0] == 172 && (ip[1] >= 16 && ip[1] < 32) || ip[0] == 192 && ip[1] == 168)
 }
 
-func lower16BitPrivateIP() (uint16, error) {
+func lower16BitPrivateIP() (int16, error) {
 	ip, err := privateIPv4()
 	if err != nil {
 		return 0, err
 	}
 
-	return uint16(ip[2])<<8 + uint16(ip[3]), nil
+	return int16(ip[2])<<8 + int16(ip[3]), nil
 }
 
 // Decompose returns a set of Sonyflake ID parts.
