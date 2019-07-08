@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -100,11 +101,15 @@ func (sf *Sonyflake) NextID() uint64 {
 		if sf.sequence == 0 {
 			sf.elapsedTime++
 			overtime := sf.elapsedTime - current
-			time.Sleep(sleepTime((overtime)))
+			time.Sleep(sleepTime(overtime))
 		}
 	}
 
 	return sf.toID()
+}
+
+func (sf *Sonyflake) NextId() string {
+	return strconv.FormatUint(sf.toID(), 10)
 }
 
 const sonyflakeTimeUnit = 1e7 // nsec, i.e. 10 msec
