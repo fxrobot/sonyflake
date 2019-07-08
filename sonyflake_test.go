@@ -17,7 +17,6 @@ var machineID uint64
 func init() {
 	var st Settings
 	st.StartTime = time.Now()
-
 	var err error
 	sf, err = NewSonyflake(st)
 	if err != nil {
@@ -31,20 +30,14 @@ func init() {
 }
 
 func nextID(t *testing.T) uint64 {
-	//id, err := sf.NextID()
-	//if err != nil {
-	//	t.Fatal("id not generated")
-	//}
-	//return id
 	return sf.NextID()
 }
 
 func TestSonyflakeOnce(t *testing.T) {
 	sleepTime := uint64(50)
 	time.Sleep(time.Duration(sleepTime) * 10 * time.Millisecond)
-
 	id := nextID(t)
-	parts := Decompose(id)
+	parts := Decompose(sf.NextID())
 
 	actualMSB := parts["msb"]
 	if actualMSB != 0 {
@@ -187,9 +180,5 @@ func TestNextIDError(t *testing.T) {
 	nextID(t)
 
 	pseudoSleep(time.Duration(1) * year)
-	sf.NextID()
-	//_, err := sf.NextID()
-	//if err == nil {
-	//	t.Errorf("time is not over")
-	//}
+	_ = sf.NextID()
 }

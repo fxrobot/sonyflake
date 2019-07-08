@@ -80,7 +80,6 @@ func NewSonyflake(st Settings) (*Sonyflake, error) {
 	if err != nil || (st.CheckMachineID != nil && !st.CheckMachineID(sf.machineID)) {
 		return nil, err
 	}
-
 	return sf, nil
 }
 
@@ -107,9 +106,8 @@ func (sf *Sonyflake) NextID() uint64 {
 
 	return sf.toID()
 }
-
 func (sf *Sonyflake) NextId() string {
-	return strconv.FormatUint(sf.toID(), 10)
+	return strconv.FormatUint(sf.NextID(), 10)
 }
 
 const sonyflakeTimeUnit = 1e7 // nsec, i.e. 10 msec
@@ -127,19 +125,9 @@ func sleepTime(overtime int64) time.Duration {
 		time.Duration(time.Now().UTC().UnixNano()%sonyflakeTimeUnit)*time.Nanosecond
 }
 
-//func (sf *Sonyflake) toID() (uint64, error) {
-//	if sf.elapsedTime >= 1<<BitLenTime {
-//		return 0, errors.New("over the time limit")
-//	}
-//
-//	return uint64(sf.elapsedTime)<<(BitLenSequence+BitLenMachineID) |
-//		uint64(sf.sequence)<<BitLenMachineID |
-//		uint64(sf.machineID), nil
-//}
 func (sf *Sonyflake) toID() uint64 {
 	if sf.elapsedTime >= 1<<BitLenTime {
-		//return 0, errors.New("over the time limit")
-		log.Println("[ID ERROR]: over the time limit")
+		log.Println("[sonyflake error]over the time limit")
 		return rand.Uint64()
 	}
 
